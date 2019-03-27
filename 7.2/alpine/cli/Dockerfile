@@ -2,7 +2,7 @@ FROM php:7.2-cli-alpine
 
 MAINTAINER Andre Schuurman <docker@drsdre.org>
 
-LABEL Description="This image is PHP 7.2 CLI running on Alpine with extension needed for Laravel applications" Vendor="Andre Schuurman" Version="7.2-cli-alpine"
+LABEL Description="This image contains PHP 7.2 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="7.2-cli-alpine"
 
 ARG EVENT_VER=event-2.4.3
 ARG EV_VER=ev-1.0.4
@@ -105,20 +105,21 @@ RUN cd /usr/src && \
 RUN pecl install -o -f redis && docker-php-ext-enable redis
 
 # Efficient data structures for PHP 7, provided as an alternative to the array. https://www.php.net/manual/en/intro.ds.php
-RUN pecl install -o -f ds && docker-php-ext-enable ds
+#RUN pecl install -o -f ds && docker-php-ext-enable ds
 
 # igbinary stores php data structures in a compact binary form: https://github.com/igbinary/igbinary
-RUN pecl install -o -f igbinary && docker-php-ext-enable igbinary
+#RUN pecl install -o -f igbinary && docker-php-ext-enable igbinary
 
 # Async programming Framework for PHP https://www.swoole.co.uk/
-RUN pecl install -o -f swoole && docker-php-ext-enable swoole
+#RUN pecl install -o -f swoole && docker-php-ext-enable swoole
 
-RUN pecl download $EVENT_VER $EV_VER \
-    && tar -xf $EVENT_VER.tgz && cd $EVENT_VER && phpize \
-    && ./configure --with-event-core --with-event-pthreads --with-event-extra --with-event-openssl \
-    && make -j$CPU_COUNT && make install && cd .. \
-    && tar -xf $EV_VER.tgz && cd $EV_VER && phpize && ./configure && make -j$CPU_COUNT && make install && cd .. \
-    && docker-php-ext-enable event ev
+# High performance event loops https://www.php.net/manual/en/intro.ev.php
+#RUN pecl download $EVENT_VER $EV_VER \
+#    && tar -xf $EVENT_VER.tgz && cd $EVENT_VER && phpize \
+#    && ./configure --with-event-core --with-event-pthreads --with-event-extra --with-event-openssl \
+#    && make -j$CPU_COUNT && make install && cd .. \
+#    && tar -xf $EV_VER.tgz && cd $EV_VER && phpize && ./configure && make -j$CPU_COUNT && make install && cd .. \
+#    && docker-php-ext-enable event ev
 
 # Change memory limit
 RUN echo 'memory_limit = 2G ' >> /usr/local/etc/php/php.ini

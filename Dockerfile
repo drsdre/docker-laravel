@@ -1,8 +1,8 @@
-FROM php:7.2-fpm-alpine
+FROM php:{{VERSION}}-{{TYPE}}-{{OS}}
 
 MAINTAINER Andre Schuurman <docker@drsdre.org>
 
-LABEL Description="This image contains PHP 7.2 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="7.2-fpm-alpine"
+LABEL Description="This image contains PHP {{VERSION}} on {{OS}} OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="{{VERSION}}-{{TYPE}}-{{OS}}"
 
 ARG EVENT_VER=event-2.4.3
 ARG EV_VER=ev-1.0.4
