@@ -4,6 +4,9 @@ MAINTAINER Andre Schuurman <docker@drsdre.org>
 
 LABEL Description="This image is PHP 7.1 running on Alpine with extension needed for Laravel applications" Vendor="Andre Schuurman" Version="7.1-cli-alpine"
 
+ARG EVENT_VER=event-2.4.3
+ARG EV_VER=ev-1.0.4
+
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
     PHP_OPCACHE_MAX_ACCELERATED_FILES="10000" \
     PHP_OPCACHE_MEMORY_CONSUMPTION="192" \
