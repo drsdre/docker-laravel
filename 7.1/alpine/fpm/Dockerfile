@@ -72,6 +72,7 @@ RUN docker-php-ext-install \
     bcmath \
     #ctype \ # Already available
     #curl \ # Already available
+    exif \
     gd \
     gettext \
     #iconv \ # Already available
