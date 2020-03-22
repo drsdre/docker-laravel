@@ -1,8 +1,8 @@
-FROM php:7.4-cli-alpine
+FROM php:7.3-fpm-alpine
 
 MAINTAINER Andre Schuurman <docker@drsdre.org>
 
-LABEL Description="This image contains PHP 7.4 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="7.4-cli-alpine"
+LABEL Description="This image contains PHP 7.3 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="7.3-fpm-alpine"
 
 ARG EVENT_VER=event-2.4.3
 ARG EV_VER=ev-1.0.4
@@ -27,12 +27,14 @@ RUN apk add --update --no-cache \
     libzip \
     #make \
     mysql-client \
+    nginx \
     nodejs \
     nodejs-npm \
     yarn \
     openssh-client \
     postgresql-libs \
-    rsync
+    rsync \
+    supervisor
 
 # Install dev dependencies
 RUN apk add --no-cache --virtual .build-deps \
@@ -62,7 +64,8 @@ RUN pecl install imagick
 RUN docker-php-ext-enable imagick
 
 # Configure PHP extensions
-RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/
+RUN docker-php-ext-configure zip --with-libzip && \
+    docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/
 
 # Build and install PHP extensions
 #RUN export CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
@@ -133,3 +136,30 @@ RUN chmod o-rx /bin/busybox /usr/bin/curl /usr/local/bin/pecl
 # Cleanup
 RUN apk del -f .build-deps && \
     rm -rf event* ev* /tmp/*  ~/.pearrc
+
+# Configure nginx
+COPY config/nginx.conf /etc/nginx/nginx.conf
+
+# Configure supervisord
+COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY config/supervisord_nginx.conf /etc/supervisor/conf.d/supervisord_nginx.conf
+COPY config/supervisord_php_fpm.conf /etc/supervisor/conf.d/supervisord_php_fpm.conf
+
+# Make the document root a volume
+VOLUME /var/www/html
+
+# Switch to use a non-root user from here on
+USER nobody
+
+# Add application
+WORKDIR /var/www/html
+COPY --chown=nobody src/ /var/www/html/
+
+# Expose the port nginx is reachable on
+EXPOSE 8080
+
+# Let supervisord start nginx & php-fpm
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+# Configure a healthcheck to validate that everything is up&running
+HEALTHCHECK --timeout=10s CMD curl --silent --fail http://127.0.0.1:8080/fpm-ping

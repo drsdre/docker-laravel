@@ -96,7 +96,7 @@ RUN docker-php-ext-install \
 RUN cd /usr/local/etc/php/conf.d/ && \
     mv docker-php-ext-sockets.ini 1-docker-php-ext-sockets.ini
 
-COPY conf.d/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+COPY config/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 
 # Install PHP PECL extensions
 RUN cd /usr/src && \
