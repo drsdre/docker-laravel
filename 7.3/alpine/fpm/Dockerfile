@@ -68,5 +68,4 @@ RUN chmod a+x /usr/local/bin/docker-php-entrypoint
 RUN chmod o-rx /bin/busybox /usr/bin/curl /usr/local/bin/pecl
 
 # Cleanup
-RUN apk del -f .build-deps && \
-    rm -rf event* ev* /tmp/*  ~/.pearrc
+RUN rm -rf /tmp/*  ~/.pearrc
