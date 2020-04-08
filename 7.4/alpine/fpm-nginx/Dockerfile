@@ -4,9 +4,6 @@ MAINTAINER Andre Schuurman <docker@drsdre.org>
 
 LABEL Description="This image contains PHP 7.4 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="7.4-fpm-alpine"
 
-ARG EVENT_VER=event-2.4.3
-ARG EV_VER=ev-1.0.4
-
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
     PHP_OPCACHE_MAX_ACCELERATED_FILES="10000" \
     PHP_OPCACHE_MEMORY_CONSUMPTION="192" \
@@ -15,82 +12,44 @@ ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
 # Install production dependencies
 RUN apk add --update --no-cache \
     bash \
-    curl \
+    curl
     #g++ \
     #gcc \
-    git \
-    imagemagick \
-    icu-libs \
-    libevent \
-    libintl \
-    libxslt \
-    libzip \
+    #git \
+    #imagemagick \
+    #icu-libs \
+    #libevent \
+    #libintl \
+    #libxslt \
+    #libzip \
     #make \
-    mysql-client \
-    nginx \
-    nodejs \
-    nodejs-npm \
-    yarn \
-    openssh-client \
-    postgresql-libs \
-    rsync \
-    supervisor
+    #mysql-client \
+    #nodejs \
+    #nodejs-npm \
+    #yarn \
+    #openssh-client \
+    #postgresql-libs \
+    #rsync
 
-# Install dev dependencies
-RUN apk add --no-cache --virtual .build-deps \
-    $PHPIZE_DEPS \
-    binutils \
-    #curl-dev \
-    freetype-dev \
-    gettext-dev \
-    icu-dev \
-    imagemagick-dev \
-    libc-dev \
-    libevent-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
-    libtool \
-    libressl-dev \
-    libxslt-dev \
-    libxml2-dev \
-    libzip-dev \
-    postgresql-dev \
-    sqlite-dev
+ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
 
-# Install PECL and PEAR extensions
-RUN pecl install imagick
-
-# Install and enable php extensions
-RUN docker-php-ext-enable imagick
-
-# Configure PHP extensions
-RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/
-
-# Build and install PHP extensions
-#RUN export CPU_COUNT=$(cat /proc/cpuinfo | grep processor | wc -l)
-#RUN docker-php-ext-install -j$CPU_COUNT \
-RUN docker-php-ext-install \
+RUN chmod uga+x /usr/local/bin/install-php-extensions && sync && \
+    install-php-extensions \
     bcmath \
-    #ctype \ # Already available
-    #curl \ # Already available
     exif \
     gd \
     gettext \
-    #iconv \ # Already available
+    igbinary \
+    imagick \
     intl \
-    #json \ # Already available
-    #mbstring \ # Already available
     opcache \
     pcntl \
-    #pdo \ # Already available
     pdo_mysql \
     pdo_pgsql \
-    #pdo_sqlite \ # Already available
-    #simplexml \ # Already available
+    redis \
     sockets \
-    #tokenizer \ # Already available
-    #xml \ # Already available
     xsl \
+    yaml \
     zip
 
 # make sockets extension load first
@@ -98,30 +57,6 @@ RUN cd /usr/local/etc/php/conf.d/ && \
     mv docker-php-ext-sockets.ini 1-docker-php-ext-sockets.ini
 
 COPY config/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
-
-# Install PHP PECL extensions
-RUN cd /usr/src && \
-    pecl channel-update pecl.php.net
-
-# Redis connector
-RUN pecl install -o -f redis && docker-php-ext-enable redis
-
-# Efficient data structures for PHP 7, provided as an alternative to the array. https://www.php.net/manual/en/intro.ds.php
-#RUN pecl install -o -f ds && docker-php-ext-enable ds
-
-# igbinary stores php data structures in a compact binary form: https://github.com/igbinary/igbinary
-#RUN pecl install -o -f igbinary && docker-php-ext-enable igbinary
-
-# Async programming Framework for PHP https://www.swoole.co.uk/
-#RUN pecl install -o -f swoole && docker-php-ext-enable swoole
-
-# High performance event loops https://www.php.net/manual/en/intro.ev.php
-#RUN pecl download $EVENT_VER $EV_VER \
-#    && tar -xf $EVENT_VER.tgz && cd $EVENT_VER && phpize \
-#    && ./configure --with-event-core --with-event-pthreads --with-event-extra --with-event-openssl \
-#    && make -j$CPU_COUNT && make install && cd .. \
-#    && tar -xf $EV_VER.tgz && cd $EV_VER && phpize && ./configure && make -j$CPU_COUNT && make install && cd .. \
-#    && docker-php-ext-enable event ev
 
 # Change memory limit
 RUN echo 'memory_limit = 2G ' >> /usr/local/etc/php/php.ini
@@ -133,26 +68,20 @@ RUN chmod a+x /usr/local/bin/docker-php-entrypoint
 RUN chmod o-rx /bin/busybox /usr/bin/curl /usr/local/bin/pecl
 
 # Cleanup
-RUN apk del -f .build-deps && \
-    rm -rf event* ev* /tmp/*  ~/.pearrc
+RUN rm -rf /tmp/*  ~/.pearrc
 
 # Configure nginx
 COPY config/nginx.conf /etc/nginx/nginx.conf
 
 # Configure supervisord
-COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY config/supervisord_nginx.conf /etc/supervisor/conf.d/supervisord_nginx.conf
-COPY config/supervisord_php_fpm.conf /etc/supervisor/conf.d/supervisord_php_fpm.conf
+COPY config/supervisord.conf /etc/supervisor/supervisord.conf
 
 # Make the document root a volume
 VOLUME /var/www/html
+WORKDIR /var/www/html
 
 # Switch to use a non-root user from here on
 USER nobody
-
-# Add application
-WORKDIR /var/www/html
-COPY --chown=nobody src/ /var/www/html/
 
 # Expose the port nginx is reachable on
 EXPOSE 8080
