@@ -12,7 +12,8 @@ ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
 # Install production dependencies
 RUN apk add --update --no-cache \
     bash \
-    curl
+    curl \
+    supervisor
     #g++ \
     #gcc \
     #git \
