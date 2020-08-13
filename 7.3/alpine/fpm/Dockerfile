@@ -13,28 +13,12 @@ ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
 RUN apk add --update --no-cache \
     bash \
     curl
-    #g++ \
-    #gcc \
-    #git \
-    #imagemagick \
-    #icu-libs \
-    #libevent \
-    #libintl \
-    #libxslt \
-    #libzip \
-    #make \
-    #mysql-client \
-    #nodejs \
-    #nodejs-npm \
-    #yarn \
-    #openssh-client \
-    #postgresql-libs \
-    #rsync
 
 ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
 
 RUN chmod uga+x /usr/local/bin/install-php-extensions && sync && \
     install-php-extensions \
+    apcu \
     bcmath \
     exif \
     gd \
@@ -69,3 +53,13 @@ RUN chmod o-rx /bin/busybox /usr/bin/curl /usr/local/bin/pecl
 
 # Cleanup
 RUN rm -rf /tmp/*  ~/.pearrc
+
+# FPM healthcheck
+RUN apk add --no-cache fcgi\
+    && wget -O /usr/local/bin/php-fpm-healthcheck \
+    https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck \
+    && chmod +x /usr/local/bin/php-fpm-healthcheck
+
+HEALTHCHECK --timeout=10s CMD php-fpm-healthcheck
+
+USER www-data
