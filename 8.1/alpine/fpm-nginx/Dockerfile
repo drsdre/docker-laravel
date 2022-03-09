@@ -1,8 +1,8 @@
-FROM drsdre/php-laravel:7.3-fpm-alpine
+FROM drsdre/php-laravel:8.1-fpm-alpine
 
 MAINTAINER Andre Schuurman <docker@drsdre.org>
 
-LABEL Description="This image contains PHP 7.3 with FPM and Ngninx on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="7.3-fpm_nginx-alpine"
+LABEL Description="This image contains PHP 8.1 with FPM and Ngninx on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="8.1-fpm_nginx-alpine"
 
 # Install production dependencies
 # install nginx (copied from official nginx Dockerfile)

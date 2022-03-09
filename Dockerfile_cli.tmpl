@@ -14,9 +14,10 @@ RUN apk add --update --no-cache \
     bash \
     curl
 
-ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
-
-RUN chmod uga+x /usr/local/bin/install-php-extensions && sync && \
+RUN curl -sSLf \
+        -o /usr/local/bin/install-php-extensions \
+        https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+    chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions \
     apcu \
     bcmath \

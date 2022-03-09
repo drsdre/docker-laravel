@@ -1,8 +1,8 @@
-FROM php:7.3-cli-alpine
+FROM php:8.0-cli-alpine
 
 MAINTAINER Andre Schuurman <docker@drsdre.org>
 
-LABEL Description="This image contains PHP 7.3 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="7.3-cli-alpine"
+LABEL Description="This image contains PHP 8.0 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="8.0-cli-alpine"
 
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
     PHP_OPCACHE_MAX_ACCELERATED_FILES="10000" \
@@ -14,9 +14,10 @@ RUN apk add --update --no-cache \
     bash \
     curl
 
-ADD https://raw.githubusercontent.com/mlocati/docker-php-extension-installer/master/install-php-extensions /usr/local/bin/
-
-RUN chmod uga+x /usr/local/bin/install-php-extensions && sync && \
+RUN curl -sSLf \
+        -o /usr/local/bin/install-php-extensions \
+        https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
+    chmod +x /usr/local/bin/install-php-extensions && \
     install-php-extensions \
     apcu \
     bcmath \
