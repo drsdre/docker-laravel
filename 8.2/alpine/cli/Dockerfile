@@ -1,8 +1,8 @@
-FROM php:7.4-cli-alpine
+FROM php:8.2-cli-alpine
 
 MAINTAINER Andre Schuurman <docker@drsdre.org>
 
-LABEL Description="This image contains PHP 7.4 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="7.4-cli-alpine"
+LABEL Description="This image contains PHP 8.2 on alpine OS with extension needed for running Laravel applications" Vendor="Andre Schuurman" Version="8.1-cli-alpine"
 
 ENV PHP_OPCACHE_VALIDATE_TIMESTAMPS="0" \
     PHP_OPCACHE_MAX_ACCELERATED_FILES="10000" \
